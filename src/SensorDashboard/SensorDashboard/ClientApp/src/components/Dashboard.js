@@ -1,5 +1,5 @@
 ﻿import React, { Component } from 'react';
-import * as signalR from '@aspnet/signalr';
+import * as signalR from '@microsoft/signalr';
 
 import SensorValue from './SensorValue.js';
 import SensorChart from './SensorChart.js';
