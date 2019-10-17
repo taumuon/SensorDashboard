@@ -13,7 +13,7 @@ export function Configuration(props) {
                 </tr>
             </thead>
             <tbody>
-                {props. sensorConfig.map(sensor =>
+                {props.sensorConfig.map(sensor =>
                     <tr key={sensor.name}>
                         <td>{sensor.name}</td>
                         <td>{sensor.manufacturer}</td>

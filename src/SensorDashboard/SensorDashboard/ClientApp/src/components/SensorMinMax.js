@@ -1,6 +1,6 @@
 ﻿import React, { Component } from 'react';
 
-// connection higher-order component
+// min-max higher-order component
 export default function withSensorMinMax(WrappedComponent) {
     class WithSensorMinMax extends Component {
         constructor(props) {
