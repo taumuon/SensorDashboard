@@ -5,14 +5,13 @@ import SensorValue from './SensorValue.js';
 import SensorChart from './SensorChart.js';
 
 import withConnection from './SensorConnection.js';
-import withSensorSeries from './SensorSeries.js';
 import withSensorMinMax from './SensorMinMax.js';
 
 import './Dashboard.css';
 
 const SensorValueWithConnection = withConnection(SensorValue);
 const SensorValueWithConnectionMinMax = withConnection(withSensorMinMax(SensorValue));
-const SensorChartWithConnection = withConnection(withSensorSeries(SensorChart));
+const SensorChartWithConnection = withConnection(SensorChart);
 
 export class Dashboard extends Component {
     constructor(props) {
