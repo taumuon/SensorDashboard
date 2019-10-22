@@ -1,4 +1,4 @@
-﻿import React, { Component } from 'react';
+﻿import React, { useState } from 'react';
 import { Button, Form, FormGroup, Input, FormFeedback, FormText, Col, Label } from 'reactstrap';
 
 export function Configuration(props) {
@@ -37,86 +37,78 @@ function ConfigurationItems(props) {
     );
 }
 
-class NewConfigurationItem extends Component {
-    constructor(props) {
-        super(props);
+export function NewConfigurationItem(props) {
+    const [sensorName, setSensorName] = useState('');
+    const [manufacturer, setManufacturer] = useState('');
+    const [errors, setErrors] = useState( {
+        sensorName: '',
+        manufacturer: ''
+    });
 
-        this.state = {
-            sensorName: '',
-            manufacturer: '',
-            host_device: '',
-            units: '',
-            errors: {
-                sensorName: '',
-                manufacturer: ''
-            },
-        };
+    const submitForm = (e) => {
+        e.preventDefault();
+        console.log(`submit ${sensorName} ${manufacturer}`)
     }
 
-    handleInput = e => {
+    const handleInput = e => {
         const { name, value } = e.target;
-
-        let errors = this.state.errors;
 
         switch (name) {
             case 'sensorName':
                 errors.sensorName = value.length <= 0 ? 'Name not set' : '';
+                setSensorName(value);
+                break;
+
+            case 'manufacturer':
+                setManufacturer(value);
                 break;
             default:
                 break;
         }
 
-        this.setState({ errors, [name]: value }, () => {
-            console.log(errors)
-        })
+        setErrors(errors);
+        console.log(errors);
     }
 
-    submitForm(e) {
-        e.preventDefault();
-        console.log(`submit ${this.state.sensorName} ${this.state.manufacturer}`)
-    }
-
-    render() {
-        return (
-            <div>
-                <h2>New Item</h2>
-                <Form onSubmit={(e) => this.submitForm(e)}>
-                    <Col>
-                        <FormGroup>
-                            <Label>Name</Label>
-                            <Input
-                                type="text"
-                                name="sensorName"
-                                value={this.state.sensorName}
-                                valid={this.state.errors.sensorName === ''}
-                                invalid={this.state.errors.sensorName !== ''}
-                                onChange={e => this.handleInput(e)}
-                                placeholder="Name" />
-                            <FormFeedback valid>
-                                Name is valid
-                            </FormFeedback>   
-                            <FormFeedback>
-                                Name is not valid
+    return (
+        <div>
+            <h2>New Item</h2>
+            <Form onSubmit={(e) => submitForm(e)}>
+                <Col>
+                    <FormGroup>
+                        <Label>Name</Label>
+                        <Input
+                            type="text"
+                            name="sensorName"
+                            value={sensorName}
+                            valid={errors.sensorName === ''}
+                            invalid={errors.sensorName !== ''}
+                            onChange={e => handleInput(e)}
+                            placeholder="Name" />
+                        <FormFeedback valid>
+                            Name is valid
                             </FormFeedback>
-                            <FormText>>Enter a unique sensor name.</FormText>
-                        </FormGroup>
-                    </Col>
-                    <Col>
-                        <FormGroup>
-                            <Label>Manufacturer</Label>
-                            <Input
-                                type="text"
-                                name="manufacturer"
-                                value={this.state.manufacturer}
-                                onChange={e => this.handleInput(e)}
-                                placeholder="Manufacturer" />
-                        </FormGroup>
-                    </Col>
-                    <Button type="submit" name="submit" value="submit">
-                        add
+                        <FormFeedback>
+                            Name is not valid
+                            </FormFeedback>
+                        <FormText>>Enter a unique sensor name.</FormText>
+                    </FormGroup>
+                </Col>
+                <Col>
+                    <FormGroup>
+                        <Label>Manufacturer</Label>
+                        <Input
+                            type="text"
+                            name="manufacturer"
+                            value={manufacturer}
+                            onChange={e => handleInput(e)}
+                            placeholder="Manufacturer" />
+                    </FormGroup>
+                </Col>
+                <Button type="submit" name="submit" value="submit">
+                    add
                     </Button>
-                </Form>
-            </div>
-        );
-    }
+            </Form>
+        </div>
+    );
 }
