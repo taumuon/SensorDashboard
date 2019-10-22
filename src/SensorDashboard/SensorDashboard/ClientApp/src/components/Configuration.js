@@ -42,43 +42,38 @@ class NewConfigurationItem extends Component {
         super(props);
 
         this.state = {
-            name: undefined,
-            manufacturer: undefined,
-            host_device: undefined,
-            units: undefined,
-            validate: {
-                nameState: '',
+            sensorName: '',
+            manufacturer: '',
+            host_device: '',
+            units: '',
+            errors: {
+                sensorName: '',
+                manufacturer: ''
             },
         };
     }
 
-    handleNameInput = e => {
-        let nameValue = e.Target.value;
-        const { validate } = this.state
-// if (!value.toString().trim().length)
-        const valid = nameValue.trim() !== ''
-        if (valid) {
-            validate.nameState = 'name-success'
-        } else {
-            validate.nameState = 'name-failure'
-        }
-        this.setState(
-            {
-                name: nameValue,
-                validate: {validate}
-            });
-    };
+    handleInput = e => {
+        const { name, value } = e.target;
 
-    handleManufacturerInput = e => {
-        this.setState(
-            {
-                manufacturer: e.Target.Value
-            });
-    };
+        let errors = this.state.errors;
+
+        switch (name) {
+            case 'sensorName':
+                errors.sensorName = value.length <= 0 ? 'Name not set' : '';
+                break;
+            default:
+                break;
+        }
+
+        this.setState({ errors, [name]: value }, () => {
+            console.log(errors)
+        })
+    }
 
     submitForm(e) {
         e.preventDefault();
-        console.log(`submit ${this.state.name} ${this.state.manufacturer}`)
+        console.log(`submit ${this.state.sensorName} ${this.state.manufacturer}`)
     }
 
     render() {
@@ -91,10 +86,11 @@ class NewConfigurationItem extends Component {
                             <Label>Name</Label>
                             <Input
                                 type="text"
-                                value={this.state.name}
-                                valid={this.state.validate.nameState === 'name-success'}
-                                invalid={this.state.validate.nameState === 'name-failure'}
-                                onChange={e => this.handleNameInput(e)}
+                                name="sensorName"
+                                value={this.state.sensorName}
+                                valid={this.state.errors.sensorName === ''}
+                                invalid={this.state.errors.sensorName !== ''}
+                                onChange={e => this.handleInput(e)}
                                 placeholder="Name" />
                             <FormFeedback valid>
                                 Name is valid
@@ -110,8 +106,9 @@ class NewConfigurationItem extends Component {
                             <Label>Manufacturer</Label>
                             <Input
                                 type="text"
+                                name="manufacturer"
                                 value={this.state.manufacturer}
-                                onChange={e => this.handleManufacturerInput(e)}
+                                onChange={e => this.handleInput(e)}
                                 placeholder="Manufacturer" />
                         </FormGroup>
                     </Col>
