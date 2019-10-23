@@ -60,6 +60,7 @@ namespace Taumuon.SensorDashboard
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<StreamHub>("/streamHub");
+                endpoints.MapHub<ConfigurationHub>("/configurationHub");
                 endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
             });
 
