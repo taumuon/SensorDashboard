@@ -1,11 +1,12 @@
-﻿import React, { useState, useEffect } from 'react';
-import * as signalR from '@microsoft/signalr';
+﻿import React from 'react';
 
 import SensorValue from './SensorValue.js';
 import SensorChart from './SensorChart.js';
 
 import withConnection from './SensorConnection.js';
 import withSensorMinMax from './SensorMinMax.js';
+
+import useHubConnect from './useHubConnect.js';
 
 import './Dashboard.css';
 
@@ -14,23 +15,7 @@ const SensorValueWithConnectionMinMax = withConnection(withSensorMinMax(SensorVa
 const SensorChartWithConnection = withConnection(SensorChart);
 
 export function Dashboard(props) {
-    const [hubConnection, setHubConnection] = useState(null);
-
-    useEffect(() => {
-        const rawHubConnection = new signalR.HubConnectionBuilder()
-            .withUrl("/streamHub")
-            //.configureLogging(signalR.LogLevel.Trace)
-            .build();
-
-        console.log("connecting to hub");
-
-        rawHubConnection.start()
-            .then(() => {
-                console.log('Connection Started!');
-                setHubConnection(rawHubConnection);
-            })
-            .catch(err => console.log('Error while estabilishing connection: ' + err));
-    }, []);
+    const hubConnection = useHubConnect('/streamHub');
 
     return (
         <div className='grid-container'>

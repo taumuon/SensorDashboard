@@ -1,11 +1,37 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Button, Form, FormGroup, Input, FormFeedback, FormText, Col, Label } from 'reactstrap';
+import useHubConnect from './useHubConnect.js';
 
 export function Configuration(props) {
+    const hubConnection = useHubConnect('/configurationHub');
+
+    let [conf, setConf] = useState({
+        sensorConfig: null,
+        sensorConfigMap: null,
+        loadingConfig: true
+    });
+
+    useEffect(() => {
+        if (hubConnection) {
+            hubConnection.invoke("sensors")
+                .then(data => {
+                    let cfgLookup = {};
+                    for (let sensor of data) {
+                        cfgLookup[sensor.name] = sensor;
+                    }
+                    setConf({
+                        sensorConfig: data,
+                        sensorConfigMap: cfgLookup,
+                        loadingConfig: false
+                    });
+                });
+        }
+    }, [hubConnection]);
+
     return (
         <div>
             <h1>Sensor Configuration</h1>
-            <ConfigurationItems {...props} />
+            <ConfigurationItems {...props} sensorConfigMap={conf.sensorConfigMap} sensorConfig={conf.sensorConfig} loadingConfig={conf.loadingConfig}/>
             <NewConfigurationItem {...props} />
         </div>
     );
