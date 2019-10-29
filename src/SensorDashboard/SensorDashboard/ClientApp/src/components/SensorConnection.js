@@ -5,47 +5,6 @@ export default function withConnection(WrappedComponent) {
     class WithConnection extends Component {
         constructor(props) {
             super(props);
-
-            this.state = {
-                latestMsg: null,
-                streamSubscription: null,
-                hubConnection: null
-            };
-        }
-
-        componentDidUpdate() {
-            if ((this.state.hubConnection !== this.props.hubConnection)
-                && ((this.props.hubConnection !== undefined))) {
-                this.setState({ hubConnection: this.props.hubConnection });
-                this.start();
-            }
-        }
-
-        componentWillUnmount() {
-            this.stop();
-        }
-
-        start() {
-            let streamSubscription = this.props.hubConnection.stream('StartListening', this.props.sensorName)
-                .subscribe({
-                    next: (item) => {
-                        this.setState({ latestMsg: item });
-                    },
-                    complete: () => {
-                        console.log('completed');
-                    },
-                    error: (err) => {
-                        console.log(err);
-                    },
-                });
-            this.setState({ streamSubscription });
-        }
-
-        stop() {
-            if (this.state.streamSubscription != null) {
-                this.state.streamSubscription.dispose();
-            }
-            this.setState({ streamSubscription: null });
         }
 
         render() {
@@ -59,7 +18,7 @@ export default function withConnection(WrappedComponent) {
 
             return (
                 <div>
-                    <WrappedComponent latestMsg={this.state.latestMsg} {...this.props} />
+                    <WrappedComponent {...this.props} />
                 </div>
             );
         }

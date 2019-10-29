@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;
-using static Taumuon.SensorDashboard.Controllers.ConfigurationController;
 
 namespace Taumuon.SensorDashboard
 {
