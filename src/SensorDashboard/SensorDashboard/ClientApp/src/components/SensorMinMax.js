@@ -1,50 +1,18 @@
-﻿import React, { Component } from 'react';
+﻿import React, { useEffect, useReducer } from 'react';
 
-// min-max higher-order component
-export default function withSensorMinMax(WrappedComponent) {
-    class WithSensorMinMax extends Component {
-        constructor(props) {
-            super(props);
+// min-max higher order component
+const withSensorMinMax = WrappedComponent => props => {
+    const [max, calcMax] = useReducer((state, action) => state === undefined ? action : Math.max(state, action), undefined);
+    const [min, calcMin] = useReducer((state, action) => state === undefined ? action : Math.min(state, action), undefined);
 
-            this.state = {
-                min: undefined,
-                max: undefined
-            };
+    useEffect(() => {
+        if (props.latestMsg && props.latestMsg !== null) {
+            calcMax(props.latestMsg.value);
+            calcMin(props.latestMsg.value);
         }
+    }, [props.latestMsg, min, max])
 
-        static getDerivedStateFromProps(props, state) {
-            if (props.latestMsg) {
-                let item = props.latestMsg;
+    return <WrappedComponent min={min} max={max} {...props} />;
+};
 
-                if (item === null) { return; }
-
-                let stateMin = (state.min === undefined) ? Number.MAX_SAFE_INTEGER : state.min;
-                let stateMax = (state.max === undefined) ? Number.MIN_SAFE_INTEGER : state.max;
-
-                let min = Math.min(stateMin, item.value);
-                let max = Math.max(stateMax, item.value);
-
-                if (min === state.min && max === state.max) {
-                    return null;
-                }
-
-                return { min: min, max: max };
-            }
-            return null;
-        }
-
-        render() {
-            return (
-                <WrappedComponent min={this.state.min} max={this.state.max} {...this.props} />
-            );
-        }
-    }
-
-    WithSensorMinMax.displayName = `WithSensorMinMax(${getDisplayName(WrappedComponent)})`;
-
-    return WithSensorMinMax;
-}
-
-function getDisplayName(WrappedComponent) {
-    return WrappedComponent.displayName || WrappedComponent.name || 'SensorMinMaxComponent';
-}
+export default withSensorMinMax;

@@ -1,34 +1,21 @@
-﻿import React, { Component } from 'react';
+﻿import React from 'react';
 
 // connection higher-order component
 export default function withConnection(WrappedComponent) {
-    class WithConnection extends Component {
-        constructor(props) {
-            super(props);
-        }
+    return props => {
 
-        render() {
-            if (this.props.hubConnection === null || this.props.hubConnection === undefined) {
-                return (
-                    <div>
-                        <p>Connecting...</p>
-                    </div>
-                );
-            }
-
+        if (props.hubConnection === null || props.hubConnection === undefined) {
             return (
                 <div>
-                    <WrappedComponent {...this.props} />
+                    <p>Connecting...</p>
                 </div>
             );
         }
-    }
 
-    WithConnection.displayName = `WithConnection(${getDisplayName(WrappedComponent)})`;
-
-    return WithConnection;
-}
-
-function getDisplayName(WrappedComponent) {
-    return WrappedComponent.displayName || WrappedComponent.name || 'ConnecctionComponent';
+        return (
+            <div>
+                <WrappedComponent {...props} />
+            </div>
+        );
+    };
 }
