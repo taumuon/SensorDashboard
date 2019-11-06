@@ -79,51 +79,19 @@ function ConfigurationItems(props) {
     );
 }
 
+const initErrors = {
+    sensorName: 'Name not set',
+    manufacturer: 'Manufacturer not set',
+    hostDevice: 'Host Device not set',
+    units: 'Units not set',
+};
+
 export function NewConfigurationItem(props) {
     const [sensorName, setSensorName] = useState('');
     const [manufacturer, setManufacturer] = useState('');
     const [hostDevice, setHostDevice] = useState('');
     const [units, setUnits] = useState('');
-    const [errors, setErrors] = useState( {
-        sensorName: 'Name not set',
-        manufacturer: 'Manufacturer not set',
-        hostDevice: 'Host Device not set',
-        units: 'Units not set',
-    });
-
-    const validate = (name, value) => {
-        let newErrors = Object.assign({}, errors)
-        switch (name) {
-            case 'sensorName':
-                if (value.length <= 0) {
-                    newErrors.sensorName = 'Name not set';
-                }
-                else if (props.sensorConfig.map(sensor => sensor.name).includes(value)) {
-                    newErrors.sensorName = 'Name already exists';
-                }
-                else {
-                    newErrors.sensorName = '';
-                }
-                break;
-
-            case 'manufacturer':
-                newErrors.manufacturer = value.length <= 0 ? 'Manufacturer not set' : '';
-                break;
-
-            case 'hostDevice':
-                newErrors.hostDevice = value.length <= 0 ? 'HostDevice not set' : '';
-                break;
-
-            case 'units':
-                newErrors.units = value.length <= 0 ? 'Units not set' : '';
-                break;
-            default:
-                break;
-        }
-
-        setErrors(newErrors);
-        console.log(newErrors);
-    }
+    const [errors, setErrors] = useState( initErrors );
 
     const submitForm = (e) => {
         e.preventDefault();
@@ -137,35 +105,45 @@ export function NewConfigurationItem(props) {
                 setManufacturer('');
                 setHostDevice('');
                 setUnits('');
-                validate('sensorName', '');
-                validate('manufacturer', '');
-                validate('hostDevice', '');
-                validate('units', '');
+                setErrors(initErrors);
             }
         });
     }
 
     const handleInput = e => {
         const { name, value } = e.target;
-
-        validate(name, value);
+        let newErrors = { ...errors };
 
         switch (name) {
             case 'sensorName':
+                if (value.length === 0) {
+                    newErrors.sensorName = 'Name not set';
+                }
+                else if (props.sensorConfig.map(sensor => sensor.name).includes(value)) {
+                    newErrors.sensorName = 'Name already exists';
+                }
+                else {
+                    newErrors.sensorName = '';
+                }
                 setSensorName(value);
                 break;
             case 'manufacturer':
+                newErrors.manufacturer = value.length === 0 ? 'Manufacturer not set' : '';
                 setManufacturer(value);
                 break;
             case 'hostDevice':
+                newErrors.hostDevice = value.length === 0 ? 'HostDevice not set' : '';
                 setHostDevice(value);
                 break;
             case 'units':
+                newErrors.units = value.length === 0 ? 'Units not set' : '';
                 setUnits(value);
                 break;
             default:
                 break;
         }
+
+        setErrors(newErrors);
     }
 
     return (
