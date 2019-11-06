@@ -31,7 +31,8 @@ namespace Taumuon.SensorDashboard
 
             services.AddSignalR();
 
-            services.AddSingleton<ISensorManager, SensorManager>(); 
+            services.AddSingleton<ISensorManager, SensorManager>();
+            services.AddSingleton<ISensorConfigManager, SensorConfigManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

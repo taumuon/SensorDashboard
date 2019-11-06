@@ -1,6 +1,6 @@
 ﻿namespace Taumuon.SensorDashboard
 {
-    public class SensorData
+    public class SensorConfigInfo
     {
         public string Name { get; set; }
 

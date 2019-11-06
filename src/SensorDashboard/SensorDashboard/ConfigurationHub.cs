@@ -1,18 +1,44 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Taumuon.SensorDashboard
 {
     public class ConfigurationHub : Hub
     {
-        public IEnumerable<SensorData> Sensors()
+        private readonly ISensorConfigManager _sensorConfigManager;
+
+        public ConfigurationHub(ISensorConfigManager sensorConfigManager)
         {
-            return new List<SensorData>
+            _sensorConfigManager = sensorConfigManager;
+        }
+
+        public IEnumerable<SensorConfigInfo> Sensors()
+        {
+            return _sensorConfigManager.Sensors;
+        }
+
+        public string AddSensor(string sensorName, string manufacturer, string hostDevice, string units)
+        {
+            SensorConfigInfo sensorConfigInfo = new SensorConfigInfo
             {
-                new SensorData { Name = "temperature_room_1", Manufacturer = "Acme", HostDevice = "RaspberryPiRoom1", SensorUnits = "℃"},
-                new SensorData { Name = "temperature_room_2", Manufacturer = "Acme", HostDevice = "RaspberryPiRoom2", SensorUnits = "℃"},
-                new SensorData { Name = "humidity_room_2", Manufacturer = "Acme", HostDevice = "RaspberyPiRoom1", SensorUnits = "%"}
+                Name = sensorName, Manufacturer = manufacturer, HostDevice = hostDevice, SensorUnits = units
             };
+
+            if (sensorName == "invalid")
+                return "sensor name not valid"; // TODO: just for testing
+
+            if (!_sensorConfigManager.TryAdd(sensorConfigInfo))
+            {
+                return $"Sensor with name '{sensorName}' already exists";
+            }
+
+            var sensorConfigUpdate = new SensorConfigUpdate { IsAdd = true, SensorConfig = sensorConfigInfo };
+            // Clients.Others
+            Clients.All.SendAsync("ConfigUpdated", sensorConfigUpdate);
+
+            return "";
         }
     }
 }

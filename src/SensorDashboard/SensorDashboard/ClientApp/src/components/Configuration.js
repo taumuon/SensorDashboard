@@ -1,38 +1,54 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Button, Form, FormGroup, Input, FormFeedback, FormText, Col, Label } from 'reactstrap';
+import { Button, Form, FormGroup, Input, FormFeedback, Col, Label } from 'reactstrap';
 import useHubConnect from './useHubConnect.js';
 
 export function Configuration(props) {
     const hubConnection = useHubConnect('/configurationHub');
 
     let [conf, setConf] = useState({
-        sensorConfig: null,
-        sensorConfigMap: null,
+        sensorConfig: [],
         loadingConfig: true
     });
 
     useEffect(() => {
         if (hubConnection) {
+            console.log('susbscribing config');
+
+            hubConnection.on("ConfigUpdated", (item) => {
+                console.log(item.sensorConfig);
+                console.log('adding item: ' + item);
+                setConf(config => {
+                    return {
+                        sensorConfig: config.sensorConfig.concat([item.sensorConfig]),
+                        loadingConfig: config.loadingConfig
+                    }
+                });
+                console.log('added item: ' + item + 'new items: ' + conf.sensorConfig);
+            });
+
             hubConnection.invoke("sensors")
                 .then(data => {
-                    let cfgLookup = {};
-                    for (let sensor of data) {
-                        cfgLookup[sensor.name] = sensor;
-                    }
-                    setConf({
-                        sensorConfig: data,
-                        sensorConfigMap: cfgLookup,
-                        loadingConfig: false
+                    setConf(config => {
+                        return {
+                            sensorConfig: config.sensorConfig.concat(data),
+                            loadingConfig: false
+                        }
                     });
                 });
+
+            //return () => { configSubscription.dispose(); };
         }
     }, [hubConnection]);
+
+    const addSensor = (name, manufacturer, hostDevice, units) => {
+        return hubConnection.invoke("addSensor", name, manufacturer, hostDevice, units);
+    };
 
     return (
         <div>
             <h1>Sensor Configuration</h1>
-            <ConfigurationItems {...props} sensorConfigMap={conf.sensorConfigMap} sensorConfig={conf.sensorConfig} loadingConfig={conf.loadingConfig}/>
-            <NewConfigurationItem {...props} />
+            <ConfigurationItems {...props} sensorConfig={conf.sensorConfig} loadingConfig={conf.loadingConfig}/>
+            <NewConfigurationItem {...props} sensorConfig={conf.sensorConfig} addSensor={addSensor}/>
         </div>
     );
 }
@@ -66,39 +82,95 @@ function ConfigurationItems(props) {
 export function NewConfigurationItem(props) {
     const [sensorName, setSensorName] = useState('');
     const [manufacturer, setManufacturer] = useState('');
+    const [hostDevice, setHostDevice] = useState('');
+    const [units, setUnits] = useState('');
     const [errors, setErrors] = useState( {
-        sensorName: '',
-        manufacturer: ''
+        sensorName: 'Name not set',
+        manufacturer: 'Manufacturer not set',
+        hostDevice: 'Host Device not set',
+        units: 'Units not set',
     });
 
-    const submitForm = (e) => {
-        e.preventDefault();
-        console.log(`submit ${sensorName} ${manufacturer}`)
-    }
-
-    const handleInput = e => {
-        const { name, value } = e.target;
-
+    const validate = (name, value) => {
+        let newErrors = Object.assign({}, errors)
         switch (name) {
             case 'sensorName':
-                errors.sensorName = value.length <= 0 ? 'Name not set' : '';
-                setSensorName(value);
+                if (value.length <= 0) {
+                    newErrors.sensorName = 'Name not set';
+                }
+                else if (props.sensorConfig.map(sensor => sensor.name).includes(value)) {
+                    newErrors.sensorName = 'Name already exists';
+                }
+                else {
+                    newErrors.sensorName = '';
+                }
                 break;
 
             case 'manufacturer':
-                setManufacturer(value);
+                newErrors.manufacturer = value.length <= 0 ? 'Manufacturer not set' : '';
+                break;
+
+            case 'hostDevice':
+                newErrors.hostDevice = value.length <= 0 ? 'HostDevice not set' : '';
+                break;
+
+            case 'units':
+                newErrors.units = value.length <= 0 ? 'Units not set' : '';
                 break;
             default:
                 break;
         }
 
-        setErrors(errors);
-        console.log(errors);
+        setErrors(newErrors);
+        console.log(newErrors);
+    }
+
+    const submitForm = (e) => {
+        e.preventDefault();
+        const result = props.addSensor(sensorName, manufacturer, hostDevice, units);
+        result.then(r => {
+            if (r !== '') {
+                alert(`unable to add sensor: ` + r)
+            }
+            else {
+                setSensorName('');
+                setManufacturer('');
+                setHostDevice('');
+                setUnits('');
+                validate('sensorName', '');
+                validate('manufacturer', '');
+                validate('hostDevice', '');
+                validate('units', '');
+            }
+        });
+    }
+
+    const handleInput = e => {
+        const { name, value } = e.target;
+
+        validate(name, value);
+
+        switch (name) {
+            case 'sensorName':
+                setSensorName(value);
+                break;
+            case 'manufacturer':
+                setManufacturer(value);
+                break;
+            case 'hostDevice':
+                setHostDevice(value);
+                break;
+            case 'units':
+                setUnits(value);
+                break;
+            default:
+                break;
+        }
     }
 
     return (
         <div>
-            <h2>New Item</h2>
+            <h2>New Sensor</h2>
             <Form onSubmit={(e) => submitForm(e)}>
                 <Col>
                     <FormGroup>
@@ -113,11 +185,10 @@ export function NewConfigurationItem(props) {
                             placeholder="Name" />
                         <FormFeedback valid>
                             Name is valid
-                            </FormFeedback>
+                        </FormFeedback>
                         <FormFeedback>
-                            Name is not valid
-                            </FormFeedback>
-                        <FormText>>Enter a unique sensor name.</FormText>
+                            {errors.sensorName}
+                        </FormFeedback>
                     </FormGroup>
                 </Col>
                 <Col>
@@ -126,14 +197,51 @@ export function NewConfigurationItem(props) {
                         <Input
                             type="text"
                             name="manufacturer"
+                            valid={errors.manufacturer === ''}
+                            invalid={errors.manufacturer !== ''}
                             value={manufacturer}
                             onChange={e => handleInput(e)}
                             placeholder="Manufacturer" />
+                        <FormFeedback>
+                            {errors.manufacturer}
+                        </FormFeedback>
                     </FormGroup>
                 </Col>
-                <Button type="submit" name="submit" value="submit">
+                <Col>
+                    <FormGroup>
+                        <Label>Host Device</Label>
+                        <Input
+                            type="text"
+                            name="hostDevice"
+                            valid={errors.hostDevice === ''}
+                            invalid={errors.hostDevice !== ''}
+                            value={hostDevice}
+                            onChange={e => handleInput(e)}
+                            placeholder="Host Device" />
+                        <FormFeedback>
+                            {errors.hostDevice}
+                        </FormFeedback>
+                    </FormGroup>
+                </Col>
+                <Col>
+                    <FormGroup>
+                        <Label>Units</Label>
+                        <Input
+                            type="text"
+                            name="units"
+                            valid={errors.units === ''}
+                            invalid={errors.units !== ''}
+                            value={units}
+                            onChange={e => handleInput(e)}
+                            placeholder="Units" />
+                        <FormFeedback>
+                            {errors.units}
+                        </FormFeedback>
+                    </FormGroup>
+                </Col>
+                <Button type="submit" name="submit" value="submit" disabled={Object.keys(errors).some(x => errors[x] !== '')}>
                     add
-                    </Button>
+                </Button>
             </Form>
         </div>
     );
