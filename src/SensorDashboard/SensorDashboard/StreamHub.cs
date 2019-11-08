@@ -21,9 +21,8 @@ namespace Taumuon.SensorDashboard
         {
             var channel = Channel.CreateUnbounded<SensorReading>();
 
-            Action<double> callback = val =>
-            {
-                if (!cancellationToken.IsCancellationRequested)
+            _sensorManager.GetSensorObservable(sensorIdentifier)
+                .Subscribe(val =>
                 {
                     var sensorReading = new SensorReading
                     {
@@ -31,18 +30,8 @@ namespace Taumuon.SensorDashboard
                         Timestamp = DateTime.Now
                     };
                     _ = Write(channel.Writer, sensorReading, cancellationToken);
-                }
-                // need to do this, or done as part of cancellaton?
-                // do in OnDisconnectedAsync ?
-                // channel.Writer.TryComplete();
-            };
+                }, cancellationToken);
 
-            cancellationToken.Register(() =>
-            {
-                _sensorManager.RemoveCallack(sensorIdentifier, callback);
-            });
-
-            _sensorManager.RegisterCallback(sensorIdentifier, callback);
 
             return channel.Reader;
         }

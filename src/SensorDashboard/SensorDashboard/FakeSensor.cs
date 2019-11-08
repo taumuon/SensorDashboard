@@ -1,37 +1,35 @@
 ﻿using System;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Taumuon.SensorDashboard
 {
     public class FakeSensor : ISensor
     {
-        private readonly object _newReadingLock = new object();
+        private double _initialValue;
 
-        private Action<double> _newReading;
-
-        public event Action<double> NewReading
+        public IObservable<double> GetReadings()
         {
-            add { lock (_newReadingLock) { _newReading += value; } }
-            remove { lock (_newReadingLock) { _newReading -= value; } }
+            return Observable.Create<double>(async (obs, token) =>
+            {
+                var currentValue = _initialValue;
+                var random = new Random();
+                while (!token.IsCancellationRequested)
+                {
+                    await Task.Delay(500);
+                    currentValue += (random.NextDouble() - 0.5);
+                    obs.OnNext(currentValue);
+                }
+
+                return Disposable.Create(() => System.Diagnostics.Debug.WriteLine("Fake sensor disconnected"));
+            });
         }
-
-        private Timer _timer;
-
-        private double _currentValue;
-        private Random _random = new Random();
 
         public FakeSensor(float initialValue)
         {
-            _currentValue = initialValue;
-
-            _timer = new Timer(_ =>
-            {
-                lock (_newReadingLock)
-                {
-                    _currentValue += (_random.NextDouble() - 0.5);
-                    _newReading?.Invoke(_currentValue);
-                }
-            }, null, 0, 500);
+            _initialValue = initialValue;
         }
     }
 }

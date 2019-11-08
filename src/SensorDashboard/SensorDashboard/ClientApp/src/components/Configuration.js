@@ -35,8 +35,6 @@ export function Configuration(props) {
                         }
                     });
                 });
-
-            //return () => { configSubscription.dispose(); };
         }
     }, [hubConnection]);
 
