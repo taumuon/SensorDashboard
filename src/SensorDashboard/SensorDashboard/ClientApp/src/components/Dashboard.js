@@ -3,7 +3,8 @@
 import SensorValue from './SensorValue.js';
 import SensorChart from './SensorChart.js';
 
-import withConnection from './SensorConnection.js';
+import withDashboardItemCard from './DashboardItemCard.js';
+import withConnectionIndicator from './SensorConnectionIndicator.js';
 import withSensorMinMax from './SensorMinMax.js';
 
 import useHubConnect from './useHubConnect.js';
@@ -12,9 +13,9 @@ import useSubscribeSensorStream from './useSubscribeSensorStream.js';
 
 import './Dashboard.css';
 
-const SensorValueWithConnection = withConnection(SensorValue);
-const SensorValueWithConnectionMinMax = withConnection(withSensorMinMax(SensorValue));
-const SensorChartWithConnection = withConnection(SensorChart);
+const SensorValueWithConnection = withDashboardItemCard(withConnectionIndicator(SensorValue));
+const SensorValueWithConnectionMinMax = withSensorMinMax(withDashboardItemCard(withConnectionIndicator(SensorValue)));
+const SensorChartWithConnection = withDashboardItemCard(withConnectionIndicator(SensorChart));
 
 
 export function Dashboard(props) {

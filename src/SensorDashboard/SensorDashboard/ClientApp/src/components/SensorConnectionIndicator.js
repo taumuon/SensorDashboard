@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 
 // connection higher-order component
-export default function withConnection(WrappedComponent) {
+export default function withConnectionIndicator(WrappedComponent) {
     return props => {
 
         if (props.hubConnection === null || props.hubConnection === undefined) {
