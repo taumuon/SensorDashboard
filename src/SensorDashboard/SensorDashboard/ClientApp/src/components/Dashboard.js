@@ -6,10 +6,9 @@ import SensorChart from './SensorChart.js';
 import withDashboardItemCard from './DashboardItemCard.js';
 import withConnectionIndicator from './SensorConnectionIndicator.js';
 import withSensorMinMax from './SensorMinMax.js';
+import withSensorConnection from './SensorConnection.js';
 
 import useHubConnect from './useHubConnect.js';
-
-import useSubscribeSensorStream from './useSubscribeSensorStream.js';
 
 import './Dashboard.css';
 
@@ -35,18 +34,6 @@ const sensorConfigItems =
 export function Dashboard(props) {
     const hubConnection = useHubConnect('/streamHub');
 
-    const sensorNames = [...new Set(sensorConfigItems.map(x => x.sensorName))];
-
-    let sensorDatas = {};
-
-    for (const sensorName of sensorNames)
-    {
-        // TODO: breaks rule of hooks even if order maintained? How to cope with dashboard config (layout) changes?
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        let sensorData = useSubscribeSensorStream(hubConnection, 'StartListening', sensorName);
-        sensorDatas[sensorName] = sensorData;
-    }
-
     return (
         <div className='grid-container'>
             {
@@ -65,7 +52,9 @@ export function Dashboard(props) {
                         component = withSensorMinMax(component);
                     }
 
-                    return component({ ...props, className: 'grid-item', key: index, latestMsg: sensorDatas[sci.sensorName].latestMsg, sensorName: sci.sensorName, hubConnection: hubConnection });
+                    component = withSensorConnection(component);
+
+                    return component({ ...props, className: 'grid-item', key: index, sensorName: sci.sensorName, hubConnection: hubConnection });
                 })
             }
         </div>
