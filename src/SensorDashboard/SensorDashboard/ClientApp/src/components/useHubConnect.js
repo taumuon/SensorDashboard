@@ -21,7 +21,7 @@ export default function useHubConnect(url) {
                 setHubConnection(rawHubConnection);
                 console.log('Connection Started! url: ' + url);
             })
-            .catch(err => console.log('Error while estabilishing connection to url: ' + url + ' err: ' + err));
+            .catch(err => console.log('Error while establishing connection to url: ' + url + ' err: ' + err));
 
         // TODO: need rawHubCconnection.stop() ?
     }, [url]);

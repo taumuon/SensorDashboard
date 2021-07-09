@@ -36,7 +36,7 @@ export function Configuration(props) {
                     });
                 });
         }
-    }, [hubConnection]);
+    }, [hubConnection, conf.sensorConfig]);
 
     const addSensor = (name, manufacturer, hostDevice, units) => {
         return hubConnection.invoke("addSensor", name, manufacturer, hostDevice, units);
