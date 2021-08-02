@@ -14,6 +14,8 @@ import './Dashboard.css';
 
 const SensorValueWithConnection = withDashboardItemCard(withConnectionIndicator(SensorValue));
 const SensorChartWithConnection = withDashboardItemCard(withConnectionIndicator(SensorChart));
+const SensorValueWithConnectionMinMax = withSensorMinMax(withDashboardItemCard(withConnectionIndicator(SensorValue)));
+const SensorChartWithConnectionMinMax = withSensorMinMax(withDashboardItemCard(withConnectionIndicator(SensorChart)));
 
 const SensorTypes = Object.freeze({
     VALUE: 'value',
@@ -27,7 +29,7 @@ const sensorConfigItems =
         { sensorName: "temperature_room_2", chartType: SensorTypes.VALUE, minMax: true },
         { sensorName: "humidity_room_2", chartType: SensorTypes.VALUE, minMax: false },
         { sensorName: "temperature_room_1", chartType: SensorTypes.CHART, minMax: false },
-        { sensorName: "temperature_room_2", chartType: SensorTypes.CHART, minMax: false },
+        { sensorName: "temperature_room_2", chartType: SensorTypes.CHART, minMax: true },
         { sensorName: "humidity_room_2", chartType: SensorTypes.CHART, minMax: true }
     ];
 
@@ -38,19 +40,22 @@ export function Dashboard(props) {
         <div className='grid-container'>
             {
                 sensorConfigItems.map((sci, index) => {
-                    let component = sci.chartType === SensorTypes.VALUE
-                        ? SensorValueWithConnection
-                        : SensorChartWithConnection;
-
                     // NOTE: can't do this, as it seems a new instance of the chart is created, and the useState hook
                     //  doesn't realise it's really the same instance - the seriesData is always empty on render.
+                    // let component = sci.chartType === SensorTypes.VALUE
+                    //    ? SensorValueWithConnection
+                    //    : SensorChartWithConnection;
                     //let component = sci.chartType === SensorTypes.VALUE
                     //    ? withDashboardItemCard(withConnectionIndicator(SensorValue))
                     //    : withDashboardItemCard(withConnectionIndicator(SensorChart));
+                    //
+                    //if (sci.minMax) {
+                    //    component = withSensorMinMax(component);
+                    //}
 
-                    if (sci.minMax) {
-                        component = withSensorMinMax(component);
-                    }
+                    let component = sci.minMax
+                        ? (sci.chartType === SensorTypes.VALUE ? SensorValueWithConnectionMinMax : SensorChartWithConnectionMinMax)
+                        : (sci.chartType === SensorTypes.VALUE ? SensorValueWithConnection : SensorChartWithConnection);
 
                     component = withSensorConnection(component);
 

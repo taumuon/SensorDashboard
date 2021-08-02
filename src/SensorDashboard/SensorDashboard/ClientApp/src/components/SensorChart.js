@@ -10,9 +10,9 @@ const maxNumMsgs = 10;
 
 export default function SensorChart(props) {
 
-    let [seriesData, setSeriesData] = useState([]);
+    const [seriesData, setSeriesData] = useState([]);
 
-    let [prevMsg, setPrevMsg] = useState(null);
+    const [prevMsg, setPrevMsg] = useState(null);
 
     const [chartKey, setChartKey] = useState(0);
 
@@ -22,7 +22,8 @@ export default function SensorChart(props) {
         const currentSeriesData = seriesData;
         // update key to force chart re-render. https://github.com/recharts/recharts/issues/655
         setChartKey(Math.random());
-        setSeriesData(currentSeriesData.concat([newPoint]).slice(-maxNumMsgs));
+        let newData = currentSeriesData.concat([newPoint]).slice(-maxNumMsgs)
+        setSeriesData(newData);
     }
 
     if (props.latestMsg == null) {

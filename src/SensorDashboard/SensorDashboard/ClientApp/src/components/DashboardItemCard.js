@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 
 // Dashboard card item higher-order component
-export default function withDashboardItemCard(WrappedComponent, footer) {
+export default function withDashboardItemCard(WrappedComponent) {
     return props => {
         let units = (props.sensorConfigMap !== undefined && props.sensorConfigMap[props.sensorName] !== undefined) ? props.sensorConfigMap[props.sensorName].sensorUnits : '';
         //let units = props.sensorConfigMap?.[props.sensorName]?.sensorUnits ?? '';
